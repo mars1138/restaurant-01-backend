@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const HttpError = require('./models/http-error');
 const menuRoutes = require('./routes/menu-routes');
@@ -13,7 +14,7 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'Origin, X-Request-With, Content-Type, Accept, Authorization'
+    'Origin, X-Request-With, Content-Type, Accept, Authorization',
   );
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
   next();
@@ -29,4 +30,14 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || 'An Unknown error occurred!' });
 });
 
-app.listen(5000);
+mongoose
+  .connect(
+    'mongodb+srv://mars:8m6kX564xvqzDcd@cluster0.ffsce.mongodb.net/restaurant-01?retryWrites=true&w=majority',
+    { useNewUrlParser: true, useUnifiedTopology: true },
+  )
+  .then(() => {
+    app.listen(5000);
+  })
+  .catch(err => {
+    console.log();
+  });
