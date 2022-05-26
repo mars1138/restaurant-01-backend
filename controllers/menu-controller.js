@@ -11,7 +11,7 @@ const getMenu = async (req, res, next) => {
     return next(error);
   }
 
-  if (dishes.length === 0) {
+  if (!dishes || dishes.length === 0) {
     const error = new HttpError('No menu items to fetch', 400);
     return next(error);
   }
