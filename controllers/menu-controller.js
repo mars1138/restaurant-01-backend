@@ -16,9 +16,7 @@ const getMenu = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({
-    menu: dishes.map((dish) => dish.toObject({ getters: true })),
-  });
+  res.json(dishes.map((dish) => dish.toObject({ getters: true })),);
 };
 
 const createMenuItem = async (req, res, next) => {
