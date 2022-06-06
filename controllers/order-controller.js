@@ -1,8 +1,85 @@
+const stripe = require('stripe')(process.env.STRIPE_API_KEY);
+
 const HttpError = require('../models/http-error');
+const MenuItem = require('../models/menuItem');
 const Order = require('../models/order');
 
+const getMenuItems = async () => {
+  let dishes;
+
+  try {
+    dishes = await MenuItem.find().exec();
+  } catch (err) {
+    const error = new HttpError('Fetching menu failed, please try again', 500);
+    console.log(error);
+  }
+
+  if (!dishes || dishes.length === 0) {
+    const error = new HttpError('No menu items to fetch', 400);
+    console.log(error);
+  }
+
+  return dishes.map((dish) => dish.toObject({ getters: true }));
+};
+
+let menuItems;
+
+(async function () {
+  try {
+    menuItems = await getMenuItems();
+  } catch (err) {
+    console.log(err);
+  }
+})();
+
+const stripeOrder = async (req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  const { items } = req.body;
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: req.body.items.map((item) => {
+        const lineItem = menuItems.find((menuItem) => menuItem.id === item.id);
+        console.log('lineItem: ', lineItem);
+        return {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: lineItem.name,
+            },
+            unit_amount: lineItem.price * 100,
+          },
+          quantity: item.quantity,
+        };
+      }),
+      success_url: `${process.env.CLIENT_URL}success`,
+      cancel_url: `${process.env.CLIENT_URL}menu`,
+    });
+
+    res.status(201).json({
+      url: session.url,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const createOrder = async (req, res, next) => {
-  const { name, email, phone, street, city, zipCode, creditCard } = req.body;
+  const {
+    name,
+    email,
+    phone,
+    street,
+    city,
+    zipCode,
+    creditCard,
+    items,
+  } = req.body;
 
   const createdOrder = new Order({
     name,
@@ -12,6 +89,7 @@ const createOrder = async (req, res, next) => {
     city,
     zipCode,
     creditCard,
+    items,
   });
 
   try {
@@ -28,4 +106,5 @@ const createOrder = async (req, res, next) => {
   });
 };
 
-module.exports.createOrder = createOrder;
+exports.createOrder = createOrder;
+exports.stripeOrder = stripeOrder;

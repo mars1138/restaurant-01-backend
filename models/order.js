@@ -10,6 +10,7 @@ const orderSchema = new Schema({
   city: { type: String, required: true },
   zipCode: { type: Number, required: true },
   creditCard: { type: Number, required: true },
+  items: { type: Array },
 });
 
 module.exports = mongoose.model('Order', orderSchema);
