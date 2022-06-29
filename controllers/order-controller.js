@@ -37,13 +37,15 @@ const stripeOrder = async (req, res, next) => {
     return res.status(200).end();
   }
 
-  const { items } = req.body;
+  const { items, location } = req.body;
 
   try {
+    console.log('location: ', req.body.location);
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
-      line_items: req.body.items.map((item) => {
+      line_items: items.map((item) => {
         const lineItem = menuItems.find((menuItem) => menuItem.id === item.id);
         console.log('lineItem: ', lineItem);
         return {
@@ -57,8 +59,11 @@ const stripeOrder = async (req, res, next) => {
           quantity: item.quantity,
         };
       }),
-      success_url: `${process.env.CLIENT_URL}success`,
-      cancel_url: `${process.env.CLIENT_URL}menu`,
+      payment_intent_data: {
+        description: `Pickup location: ${location}`,
+      },
+      success_url: `${process.env.CLIENT_URL}/success`,
+      cancel_url: `${process.env.CLIENT_URL}/menu`,
     });
 
     res.status(201).json({
