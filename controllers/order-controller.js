@@ -1,3 +1,4 @@
+const {validationResult} = require('express-validator');
 const stripe = require('stripe')(process.env.STRIPE_API_KEY);
 
 const HttpError = require('../models/http-error');
@@ -17,6 +18,7 @@ const getMenuItems = async () => {
   if (!dishes || dishes.length === 0) {
     const error = new HttpError('No menu items to fetch', 400);
     console.log(error);
+    return error;
   }
 
   return dishes.map((dish) => dish.toObject({ getters: true }));
@@ -37,7 +39,13 @@ const stripeOrder = async (req, res, next) => {
     return res.status(200).end();
   }
 
-  const { items, location } = req.body;
+  const errors = validationResult(req);
+
+  if(!errors.isEmpty()) {
+    return next(new HttpError('Please enter a valid location and/or time!', 422));
+  }
+
+  const { items, location, pickupTime } = req.body;
 
   try {
     console.log('location: ', req.body.location);
@@ -60,7 +68,7 @@ const stripeOrder = async (req, res, next) => {
         };
       }),
       payment_intent_data: {
-        description: `Pickup location: ${location}`,
+        description: `Pickup info: ${location} ${pickupTime}`,
       },
       success_url: `${process.env.CLIENT_URL}/success`,
       cancel_url: `${process.env.CLIENT_URL}/menu`,
