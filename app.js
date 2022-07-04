@@ -23,6 +23,11 @@ app.use((req, res, next) => {
     'Access-Control-Allow-Methods',
     'GET, POST, PATCH, DELETE, OPTIONS'
   );
+
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', 'POST, PUT, PATCH, GET, DELETE');
+    return res.status(200).json({});
+  }
   next();
 });
 
