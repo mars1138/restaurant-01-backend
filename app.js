@@ -14,11 +14,17 @@ app.use(bodyParser.json());
 app.use(
   cors({
     origin: '*',
+    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH', 'OPTIONS'],
+    allowedHeaders: [
+      'Origin',
+      'X-Requested-With',
+      'Content-Type',
+      'Accept',
+      'Authorization',
+    ],
   })
 );
-app.use(cors({
-  methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
-}));
+
 // app.use((req, res, next) => {
 //   res.setHeader('Content-Type', 'application/json');
 //   res.setHeader('Access-Control-Allow-Origin', '*');
