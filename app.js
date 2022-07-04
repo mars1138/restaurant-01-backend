@@ -7,30 +7,39 @@ const orderRoutes = require('./routes/order-routes');
 const contactRoutes = require('./routes/contact-routes');
 
 const app = express();
+const cors = require('cors');
 
 app.use(bodyParser.json());
 
-app.use((req, res, next) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-  );
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PATCH, DELETE, OPTIONS'
-  );
+app.use(
+  cors({
+    origin: '*',
+  })
+);
+app.use(cors({
+  methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
+}));
+// app.use((req, res, next) => {
+//   res.setHeader('Content-Type', 'application/json');
+//   res.setHeader('Access-Control-Allow-Origin', '*');
+//   res.setHeader(
+//     'Access-Control-Allow-Headers',
+//     'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+//   );
+//   res.setHeader(
+//     'Access-Control-Allow-Methods',
+//     'GET, POST, PATCH, DELETE, OPTIONS'
+//   );
 
-  if (req.method === 'OPTIONS') {
-    res.setHeader(
-      'Access-Control-Allow-Methods',
-      'POST, PUT, PATCH, GET, DELETE, OPTIONS'
-    );
-    return res.status(200).json({});
-  }
-  next();
-});
+//   if (req.method === 'OPTIONS') {
+//     res.setHeader(
+//       'Access-Control-Allow-Methods',
+//       'POST, PUT, PATCH, GET, DELETE, OPTIONS'
+//     );
+//     return res.status(200).json({});
+//   }
+//   next();
+// });
 
 app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
