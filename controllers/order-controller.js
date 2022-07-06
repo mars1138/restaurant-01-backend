@@ -1,4 +1,4 @@
-const {validationResult} = require('express-validator');
+const { validationResult } = require('express-validator');
 const stripe = require('stripe')(process.env.STRIPE_API_KEY);
 
 const HttpError = require('../models/http-error');
@@ -41,8 +41,8 @@ const stripeOrder = async (req, res, next) => {
 
   const errors = validationResult(req);
 
-  if(!errors.isEmpty()) {
-    return next(new HttpError('Please enter a valid location and/or time!', 422));
+  if (!errors.isEmpty()) {
+    return next(new HttpError('Please enter a valid location and time!', 422));
   }
 
   const { items, location, pickupTime } = req.body;
